@@ -309,10 +309,8 @@ $("loginForm").addEventListener("submit",async e=>{
     await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
     $("password").value="";
     $("loginMessage").textContent="";
-} catch(err) {
-  console.error("Firebase login error:", err.code, err.message);
-  $("loginMessage").textContent =
-    "Login gagal: " + (err.code || "unknown");
+  }catch(err){
+    $("loginMessage").textContent="Login gagal. Periksa email dan kata sandi akun Firebase.";
   }
 });
 
@@ -353,4 +351,4 @@ onAuthStateChanged(auth,user=>{
 });
 </script>
 </body>
-</html>
+                              </html>
