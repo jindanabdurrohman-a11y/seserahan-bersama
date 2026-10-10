@@ -302,13 +302,63 @@ async function startSharedData(user){
   });
 }
 
-$("loginForm").addEventListener("submit",async e=>{
+
+$("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
-  $("loginMessage").textContent="Memeriksa akun...";
-  try{
-    await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
-    $("password").value="";
-    $("loginMessage").textContent="";
+
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  const message = $("loginMessage");
+  const button = $("loginForm").querySelector('button[type="submit"]');
+
+  if (!email || !password) {
+    message.textContent = "Masukkan email dan kata sandi terlebih dahulu.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Memeriksa akun...";
+  message.textContent = "";
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    $("password").value = "";
+    message.textContent = "";
+  } catch (err) {
+    console.error("Firebase login error:", err.code, err.message);
+
+    const messages = {
+      "auth/invalid-email":
+        "Format email tidak valid. Periksa kembali email kamu.",
+      "auth/invalid-credential":
+        "Email atau kata sandi salah. Periksa kembali, lalu coba lagi.",
+      "auth/user-not-found":
+        "Akun tidak ditemukan. Pastikan kamu menggunakan akun yang terdaftar.",
+      "auth/wrong-password":
+        "Kata sandi tidak cocok. Coba periksa kembali.",
+      "auth/user-disabled":
+        "Akun ini dinonaktifkan. Periksa pengaturannya di Firebase.",
+      "auth/too-many-requests":
+        "Terlalu banyak percobaan. Tunggu beberapa saat sebelum mencoba lagi.",
+      "auth/unauthorized-domain":
+        "Domain website belum diizinkan. Periksa Authentication → Settings → Authorized domains.",
+      "auth/network-request-failed":
+        "Koneksi internet bermasalah. Periksa koneksi lalu coba lagi.",
+      "auth/operation-not-allowed":
+        "Login Email/Password belum diaktifkan di Firebase.",
+      "auth/invalid-api-key":
+        "Konfigurasi API Firebase tidak valid. Periksa firebaseConfig."
+    };
+
+    message.textContent =
+      messages[err.code] ||
+      `Login gagal (${err.code || "unknown"}). Periksa koneksi dan konfigurasi Firebase.`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Masuk";
+  }
+});
+ 
 } catch(err) {
   console.error("Firebase login error:", err.code, err.message);
   $("loginMessage").textContent =
